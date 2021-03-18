@@ -22,7 +22,7 @@ library(stringr)
 library(plotly)
 library(DT)
 library(shiny)
-library(shinyWidgets)
+# library(shinyWidgets)
 library(lubridate)
 library(tidyverse)
 library(janitor)
@@ -152,6 +152,12 @@ uniao <- rbind(nordeste_base,sul_base,nordeste_base,sudeste_base,centro_oeste_ba
 ```
 
 ```{r}
-datatable(uniao)
+nomes_atributos <-  read_excel("tg2r_transforma.xlsx")
+colnames(uniao) <- nomes_atributos$r_name
+```
+
+
+```{r}
+datatable(uniao %>% group_by(orgao, subitem) %>% filter(uf_sigla == "SC") %>% summarise(pago = sum(pago)))
 ```
 
