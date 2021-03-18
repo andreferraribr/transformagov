@@ -1,0 +1,110 @@
+---
+title: "TRANSFORMAGOV_dados"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    source_code: https://github.com/andreferraribr/transformagov
+    social:
+    - twitter
+    - facebook
+    - menu
+runtime: shiny
+
+---
+
+
+
+```{r setup, include=FALSE}
+options(scipen=999)
+options(digits=2)
+# options (LC_NUMERIC="pt_BR.UTF-8")
+```
+
+
+
+
+```{r libraries,  message=FALSE}
+library(flexdashboard)
+library(readxl)
+library(ggplot2)
+library(stringr)
+library(plotly)
+library(DT)
+library(shiny)
+library(shinyWidgets)
+library(lubridate)
+library(tidyverse)
+library(janitor)
+library(googledrive)
+library(gargle)
+
+```
+
+```{r}
+# profvis({  
+# profvis::profvis(expr = rmarkdown::run("flexdashboard.Rmd"), prof_output = "flexdashboard.html")
+# https://community.rstudio.com/t/faster-flexdashboard-loading/28681/2
+```
+
+
+
+```{r negar %in%}
+# https://www.r-bloggers.com/the-notin-operator/
+'%!in%' <- Negate('%in%')
+```
+
+```{r função "dados" importar e renomear variaveis}
+# funcao para importar dados e renomear variaveis
+dados = function(tg, depara){
+  # carregar planilha com dados do Tesouro Gerencial (tg)
+  df <- read_xlsx(tg)
+  # carregar planilha com o de_para dos nomes dos atributos do Tesouro Gerencial para nomes mais amigáveis para as variáveis. Por exemplo, de(Unidade Orçamentária Código) para(uo_cod)
+  tg2r <- read_xlsx(depara)
+  # renomear as colunas da df fazendo o de_para
+  colnames(df)<-tg2r$r_name
+  return(df)
+}
+```
+
+
+
+
+
+
+```{r baixar arquivo do google drive, include=FALSE}
+# https://gargle.r-lib.org/articles/non-interactive-auth.html
+# usar uma vez para obter o token
+# drive_auth(use_oob=TRUE)
+# designate project-specific cache
+options(gargle_oauth_cache = ".secrets")
+# check the value of the option, if you like
+gargle::gargle_oauth_cache()
+# trigger auth on purpose --> store a token in the specified cache
+drive_auth()
+# see your token file in the cache, if you like
+list.files(".secrets/")
+ # drive_auth(email = "tesouro2r@gmail.com")
+drive_download("~/Attachments/r_custos.xlsx",
+               overwrite = TRUE)
+drive_download("~/Attachments/r_credito_2.xlsx",
+               overwrite = TRUE)
+drive_download("~/Attachments/r_limite.xlsx",
+               overwrite = TRUE)
+drive_download("~/Attachments/r_repasse.xlsx",
+               overwrite = TRUE)
+drive_download("~/Attachments/r_etapas.xlsx",
+               overwrite = TRUE)
+drive_download("~/Attachments/projetado.xlsx",
+               overwrite = TRUE)
+drive_download("~/Attachments/r_credito.xlsx",
+               overwrite = TRUE)
+```
+```{r utilizar a função dados para renomear colunas dos arquivos baixados do Google Drive, eval=FALSE, include=FALSE}
+projetado <- read_xlsx("projetado.xlsx")
+credito <- dados("r_credito_2.xlsx", "tg2r_credito_2.xlsx")
+limite <- dados("r_limite.xlsx", "tg2r_financeiro.xlsx")
+repasse <- dados("r_repasse.xlsx", "tg2r_financeiro.xlsx")
+etapas <- dados("r_etapas.xlsx", "tg2r_etapas.xlsx")
+#  importar relatório gerado no Tesouro Gerencial com dados sobre o custos e renomear as colunas
+custos <- dados("r_custos.xlsx", "tg2r_custos.xlsx")
+```
